@@ -3,10 +3,10 @@ defmodule ConduitAMQP.PubSub do
   use AMQP
 
   def start_link(topology, subscribers, opts) do
-    Supervisor.start_link(__MODULE__, {topology, subscribers, opts}, name: __MODULE__)
+    Supervisor.start_link(__MODULE__, [topology, subscribers, opts], name: __MODULE__)
   end
 
-  def init({topology, subscribers, opts}) do
+  def init([topology, subscribers, opts]) do
     import Supervisor.Spec
 
     case ConduitAMQP.with_conn(&Channel.open/1) do
@@ -20,7 +20,7 @@ defmodule ConduitAMQP.PubSub do
       max_overflow: 0
     ]
 
-    sub_pool_opts = [subscribers, opts]
+    sub_pool_opts = [ConduitAMQP.ConnPool, subscribers, opts]
 
     children = [
       :poolboy.child_spec(ConduitAMQP.PubPool, pub_pool_opts, ConduitAMQP.ConnPool),

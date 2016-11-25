@@ -1,4 +1,4 @@
-defmodule Conduit.Pub do
+defmodule ConduitAMQP.Pub do
   use GenServer
   use AMQP
 
@@ -35,13 +35,13 @@ defmodule Conduit.Pub do
         Process.monitor(chan.pid)
         {:noreply, %{state | chan: chan, status: :connected}}
       _ ->
-        Process.send_after(self, @reconnect_after_ms, :connect)
+        Process.send_after(self, :connect, @reconnect_after_ms)
         {:noreply, %{state | chan: nil, status: :disconnected}}
     end
   end
 
   def handle_info({:DOWN, _ref, :process, _pid, _reason}, state) do
-    Process.send_after(self, @reconnect_after_ms, :connect)
+    Process.send_after(self, :connect, @reconnect_after_ms)
     {:noreply, %{state | status: :disconnected}}
   end
 

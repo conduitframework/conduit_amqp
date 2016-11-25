@@ -22,10 +22,10 @@ defmodule ConduitAMQP do
   """
 
   def start_link(topology, subscribers, opts) do
-    Supervisor.start_link(__MODULE__, {topology, subscribers, opts}, name: __MODULE__)
+    Supervisor.start_link(__MODULE__, [topology, subscribers, opts], name: __MODULE__)
   end
 
-  def init({topology, subscribers, opts}) do
+  def init([topology, subscribers, opts]) do
     Logger.info("AMQP Adapter started!")
     import Supervisor.Spec
 
@@ -39,7 +39,8 @@ defmodule ConduitAMQP do
 
     children = [
       :poolboy.child_spec(ConduitAMQP.ConnPool, conn_pool_opts, opts),
-      worker(ConduitAMQP.PubSub, [topology, subscribers, opts])
+      supervisor(ConduitAMQP.PubSub, [topology, subscribers, opts]),
+      supervisor(ConduitAMQP.Subscribers, [])
     ]
 
     supervise(children, strategy: :one_for_one)
