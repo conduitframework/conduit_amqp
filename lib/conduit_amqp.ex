@@ -48,10 +48,11 @@ defmodule ConduitAMQP do
 
   def publish(message, opts \\ []) do
     exchange = Keyword.get(opts, :exchange)
+    props = ConduitAMQP.Props.get(message)
 
     case get_chan(0, @pool_size) do
       {:ok, chan} ->
-        Basic.publish(chan, exchange, message.destination, message.body, opts)
+        Basic.publish(chan, exchange, message.destination, message.body, props)
       {:error, reason} ->
         {:error, reason}
     end

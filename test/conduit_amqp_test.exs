@@ -51,10 +51,10 @@ defmodule ConduitAmqpTest do
 
     ConduitAMQP.publish(message, [exchange: "exchange.test"])
 
-    assert_receive {:subscriber, received_message}, 10000
+    assert_receive {:subscriber, received_message}
 
     assert received_message.source == "queue.test"
-    assert get_meta(received_message, :routing_key) == "event.test"
+    assert get_header(received_message, "routing_key") == "event.test"
     assert received_message.body == "test"
   end
 end

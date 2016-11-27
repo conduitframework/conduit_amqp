@@ -22,10 +22,14 @@ defmodule ConduitAMQP.Subscriber do
 
     case subscriber.call(message, []) do
       %Message{status: :ack} ->
-        Basic.ack(chan, props.consumer_tag)
+        Basic.ack(chan, props.delivery_tag)
       %Message{status: :nack} ->
-        Basic.reject(chan, props.consumer_tag)
+        Basic.reject(chan, props.delivery_tag)
     end
+
+    {:stop, :normal, state}
+  catch _error ->
+    Basic.ack(chan, props.delivery_tag)
 
     {:stop, :normal, state}
   end
