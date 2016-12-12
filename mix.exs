@@ -45,8 +45,7 @@ defmodule ConduitAmqp.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    [{:amqp, "~> 0.1"},
-     {:amqp_client, "3.6.2", hex: :conduit_amqp_client, override: true},
+    [{:amqp, "~> 0.1", hex: :amqp19},
      {:connection, "~> 1.0"},
      {:poolboy, "~> 1.5"},
      {:conduit, "~> 0.5"},
