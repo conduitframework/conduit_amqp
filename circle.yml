@@ -1,6 +1,5 @@
 machine:
   environment:
-    PATH: "$HOME/.asdf/bin:$HOME/.asdf/shims:$PATH"
     AMQP_URL: amqp://localhost:5672
   services:
     - rabbitmq-server

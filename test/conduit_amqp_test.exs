@@ -5,7 +5,7 @@ defmodule ConduitAmqpTest do
   defmodule TestSubscriber do
     use Conduit.Subscriber
 
-    def call(message, next, _opts) do
+    def process(message, _opts) do
       send(ConduitAMQPTest, {:subscriber, message})
 
       message
