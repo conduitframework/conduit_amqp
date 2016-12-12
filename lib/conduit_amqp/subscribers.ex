@@ -1,5 +1,8 @@
 defmodule ConduitAMQP.Subscribers do
   use Supervisor
+  @moduledoc """
+  Supervisor for subscribers that process messages.
+  """
 
   def start_link(opts \\ []) do
     Supervisor.start_link(__MODULE__, opts, name: __MODULE__)
@@ -8,7 +11,7 @@ defmodule ConduitAMQP.Subscribers do
   def init(_opts) do
     children = [worker(ConduitAMQP.Subscriber, [], restart: :temporary)]
 
-    supervise(children, strategy: :simple_one_for_one, name: __MODULE__)
+    supervise(children, strategy: :simple_one_for_one)
   end
 
   def start_subscriber(chan, source, subscriber, payload, props) do

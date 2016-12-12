@@ -1,0 +1,29 @@
+machine:
+  environment:
+    PATH: "$HOME/.asdf/bin:$HOME/.asdf/shims:$PATH"
+    AMQP_URL: amqp://localhost:5672
+  services:
+    - rabbitmq-server
+
+dependencies:
+  cache_directories:
+  pre:
+    - if ! asdf | grep version; then git clone https://github.com/HashNuke/asdf.git ~/.asdf; fi
+    - asdf plugin-add erlang https://github.com/HashNuke/asdf-erlang.git || true
+    - asdf plugin-add elixir https://github.com/HashNuke/asdf-elixir.git || true
+    - asdf install
+    - mix local.rebar --force
+    - yes | mix deps.get
+  override:
+    - mix compile
+    - MIX_ENV=test mix compile
+    - MIX_ENV=prod mix compile
+    - mix dialyzer --halt-exit-status
+  cache_directories:
+    - deps
+    - _build
+    - ~/.asdf
+
+test:
+  override:
+    - mix coveralls.circle

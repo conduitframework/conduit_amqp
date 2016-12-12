@@ -43,12 +43,9 @@ defmodule ConduitAMQP.Conn do
   def terminate(_reason, %{conn: nil}), do: :ok
   def terminate(_reason, %{conn: conn}) do
     Logger.info "AMQP connection terminating"
-    # Taken from:
-    # pma/phoenix_pubsub_rabbitmq/blob/master/lib/phoenix/pubsub/rabbitmq_conn.ex:54
-    try do
-      AMQP.Connection.close(conn)
-    catch
-      _, _ -> :ok
-    end
+
+    AMQP.Connection.close(conn)
+  catch _, _ ->
+    :ok
   end
 end

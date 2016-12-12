@@ -20,7 +20,7 @@ defmodule ConduitAMQP.Subscriber do
   def handle_info(:process, %{chan: chan, source: source, subscriber: subscriber, payload: payload, props: props} = state) do
     message = build_message(source, payload, props)
 
-    case subscriber.call(message, []) do
+    case subscriber.run(message, []) do
       %Message{status: :ack} ->
         Basic.ack(chan, props.delivery_tag)
       %Message{status: :nack} ->
@@ -29,7 +29,7 @@ defmodule ConduitAMQP.Subscriber do
 
     {:stop, :normal, state}
   catch _error ->
-    Basic.ack(chan, props.delivery_tag)
+    Basic.reject(chan, props.delivery_tag)
 
     {:stop, :normal, state}
   end
