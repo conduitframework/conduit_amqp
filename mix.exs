@@ -46,7 +46,7 @@ defmodule ConduitAmqp.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [{:amqp, "~> 0.1"},
-     {:amqp_client, github: "dsrosario/amqp_client", branch: "erlang_otp_19", override: true},
+     {:amqp_client, "3.6.2", hex: :conduit_amqp_client, override: true},
      {:connection, "~> 1.0"},
      {:poolboy, "~> 1.5"},
      {:conduit, "~> 0.5"},
