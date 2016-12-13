@@ -9,16 +9,18 @@ defmodule ConduitAMQP do
   @moduledoc """
   AMQP adapter for Conduit.
 
-    * `options` - The optional RabbitMQ options:
-    * `host` - The hostname of the broker (defaults to \"localhost\");
-    * `port` - The port the broker is listening on (defaults to `5672`);
-    * `username` - The name of a user registered with the broker (defaults to \"guest\");
-    * `password` - The password of user (defaults to \"guest\");
-    * `virtual_host` - The name of a virtual host in the broker (defaults to \"/\");
-    * `heartbeat` - The hearbeat interval in seconds (defaults to `0` - turned off);
-    * `connection_timeout` - The connection timeout in milliseconds (defaults to `infinity`);
+    * `url` - Full connection url. Can be used instead of the individual connection options. Default is `amqp://guest:guest@localhost:5672/`.
+    * `host` - Hostname of the broker (defaults to \"localhost\");
+    * `port` - Port the broker is listening on (defaults to `5672`);
+    * `username` - Username to connect to the broker as (defaults to \"guest\");
+    * `password` - Password to connect to the broker with (defaults to \"guest\");
+    * `virtual_host` - Name of a virtual host in the broker (defaults to \"/\");
+    * `heartbeat` - Hearbeat interval in seconds (defaults to `0` - turned off);
+    * `connection_timeout` - Connection timeout in milliseconds (defaults to `infinity`);
     * `conn_pool_size` - Number of active connections to the broker
-    * `pub_pool_size` - Number of publisher
+    * `pub_pool_size` - Number of publisher channels
+    * `options` - Extra RabbitMQ options
+
   """
 
   def start_link(topology, subscribers, opts) do

@@ -22,15 +22,17 @@ This package can be installed as:
     end
     ```
 
-## Architecture
+## Configuring the Adapter
 
-![ConduitAQMP architecture](https://hexdocs.pm/conduit_amqp/assets/architecture.png)
+```elixir
+# config/config.exs
 
-When ConduitAMQP is used as an adapter for Conduit, it starts ConduitAMQP as a child supervisor. ConduitAMQP starts:
+config :my_app, MyApp.Broker,
+  adapter: ConduitAMQP,
+  url: "amqp://my_app:secret@my-rabbit-host.com"
+```
 
-  1. ConduitAQMP.ConnPool - Creates and supervises a pool of AMQP connections.
-  2. ConduitAMQP.PubSub - Creates and supervises ConduitAMQP.PubPool and ConduitAMQP.SubPool.
-  3. ConduitAMQP.Subscribers - A supervisor for subscribers that process messages.
+For the full set of options, see `ConduitAQMP`.
 
 ## Configuring Exchanges
 
@@ -88,9 +90,18 @@ defmodule MyApp.Broker do
 end
 ```
 
-## Publishing
+## Publishing Messages
 TODO
 
 ## Special Headers
 TODO
 
+## Architecture
+
+![ConduitAQMP architecture](https://hexdocs.pm/conduit_amqp/assets/architecture.png)
+
+When ConduitAMQP is used as an adapter for Conduit, it starts ConduitAMQP as a child supervisor. ConduitAMQP starts:
+
+  1. ConduitAQMP.ConnPool - Creates and supervises a pool of AMQP connections.
+  2. ConduitAMQP.PubSub - Creates and supervises ConduitAMQP.PubPool and ConduitAMQP.SubPool.
+  3. ConduitAMQP.Subscribers - A supervisor for subscribers that process messages.
