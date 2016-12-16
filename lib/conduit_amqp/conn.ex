@@ -22,7 +22,9 @@ defmodule ConduitAMQP.Conn do
   end
 
   def connect(_, state) do
-    case AMQP.Connection.open(state.opts) do
+    connect_opts = Keyword.get(state.opts, :url, state.opts)
+
+    case AMQP.Connection.open(connect_opts) do
       {:ok, conn} ->
         Logger.info("Connected via AMQP!")
         Process.monitor(conn.pid)
