@@ -5,19 +5,19 @@ defmodule ConduitAMQP.Sub do
 
   @reconnect_after_ms 5_000
 
-  def start_link(conn_pool_name, name, subscriber, opts) do
-    GenServer.start_link(__MODULE__, [conn_pool_name, name, subscriber, opts])
+  def start_link(conn_pool_name, broker, name, opts) do
+    GenServer.start_link(__MODULE__, [conn_pool_name, broker, name, opts])
   end
 
-  def init([conn_pool_name, name, subscriber, opts]) do
+  def init([conn_pool_name, broker, name, opts]) do
     Process.flag(:trap_exit, true)
     send(self, :connect)
     {:ok, %{
       status: :disconnected,
       chan: nil,
       conn_pool_name: conn_pool_name,
+      broker: broker,
       name: name,
-      subscriber: subscriber,
       opts: opts}}
   end
 
@@ -42,9 +42,9 @@ defmodule ConduitAMQP.Sub do
     end
   end
 
-  def handle_info({:basic_deliver, payload, props}, %{chan: chan, subscriber: subscriber, name: name, opts: opts} = state) do
+  def handle_info({:basic_deliver, payload, props}, %{chan: chan, broker: broker, name: name, opts: opts} = state) do
     source = opts[:from] || Atom.to_string(name)
-    {:ok, _pid} = ConduitAMQP.Subscribers.start_subscriber(chan, source, subscriber, payload, props)
+    {:ok, _pid} = ConduitAMQP.Subscribers.start_subscriber(chan, source, broker, name, payload, props)
 
     {:noreply, state}
   end

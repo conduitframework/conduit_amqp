@@ -14,7 +14,7 @@ defmodule ConduitAMQP.Subscribers do
     supervise(children, strategy: :simple_one_for_one)
   end
 
-  def start_subscriber(chan, source, subscriber, payload, props) do
-    Supervisor.start_child(__MODULE__, [chan, source, subscriber, payload, props])
+  def start_subscriber(chan, source, broker, name, payload, props) do
+    Supervisor.start_child(__MODULE__, [chan, source, broker, name, payload, props])
   end
 end

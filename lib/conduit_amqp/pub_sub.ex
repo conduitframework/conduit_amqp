@@ -6,12 +6,12 @@ defmodule ConduitAMQP.PubSub do
   """
 
 
-  def start_link(topology, subscribers, opts) do
-    Supervisor.start_link(__MODULE__, [topology, subscribers, opts], name: __MODULE__)
+  def start_link(broker, topology, subscribers, opts) do
+    Supervisor.start_link(__MODULE__, [broker, topology, subscribers, opts], name: __MODULE__)
   end
 
   @doc false
-  def init([topology, subscribers, opts]) do
+  def init([broker, topology, subscribers, opts]) do
     import Supervisor.Spec
 
     case ConduitAMQP.with_conn(&Channel.open/1) do
@@ -25,7 +25,7 @@ defmodule ConduitAMQP.PubSub do
       max_overflow: 0
     ]
 
-    sub_pool_opts = [ConduitAMQP.ConnPool, subscribers, opts]
+    sub_pool_opts = [ConduitAMQP.ConnPool, broker, subscribers, opts]
 
     children = [
       :poolboy.child_spec(ConduitAMQP.PubPool, pub_pool_opts, ConduitAMQP.ConnPool),

@@ -5,22 +5,22 @@ defmodule ConduitAMQP.Subscriber do
   alias Conduit.Message
   alias ConduitAMQP.Props
 
-  def start_link(chan, source, subscriber, payload, props) do
-    GenServer.start_link(__MODULE__, [chan, source, subscriber, payload, props])
+  def start_link(chan, source, broker, name, payload, props) do
+    GenServer.start_link(__MODULE__, [chan, source, broker, name, payload, props])
   end
 
-  def init([chan, source, subscriber, payload, props]) do
+  def init([chan, source, broker, name, payload, props]) do
     Process.flag(:trap_exit, true)
     Process.monitor(chan.pid)
     send(self, :process)
 
-    {:ok, %{chan: chan, source: source, subscriber: subscriber, payload: payload, props: props}}
+    {:ok, %{chan: chan, source: source, broker: broker, name: name, payload: payload, props: props}}
   end
 
-  def handle_info(:process, %{chan: chan, source: source, subscriber: subscriber, payload: payload, props: props} = state) do
+  def handle_info(:process, %{chan: chan, source: source, broker: broker, name: name, payload: payload, props: props} = state) do
     message = build_message(source, payload, props)
 
-    case subscriber.run(message, []) do
+    case broker.receives(name, message) do
       %Message{status: :ack} ->
         Basic.ack(chan, props.delivery_tag)
       %Message{status: :nack} ->

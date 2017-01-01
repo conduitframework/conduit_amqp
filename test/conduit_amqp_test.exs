@@ -2,21 +2,19 @@ defmodule ConduitAmqpTest do
   use ExUnit.Case
   use AMQP
 
-  defmodule TestSubscriber do
-    use Conduit.Subscriber
-
-    def process(message, _opts) do
-      send(ConduitAMQPTest, {:subscriber, message})
+  defmodule Broker do
+    def receives(name, message) do
+      send(ConduitAMQPTest, {:broker, message})
 
       message
     end
   end
 
   @topology [{:queue, "queue.test", from: ["#.test"], exchange: "exchange.test"}, {:exchange, "exchange.test", []}]
-  @subscribers %{queue_test: {TestSubscriber, from: "queue.test"}}
+  @subscribers %{queue_test: [from: "queue.test"]}
   setup_all do
     opts = Application.get_env(:conduit, ConduitAMQPTest)
-    ConduitAMQP.start_link(@topology, @subscribers, opts)
+    ConduitAMQP.start_link(Broker, @topology, @subscribers, opts)
 
     :ok
   end
@@ -51,7 +49,7 @@ defmodule ConduitAmqpTest do
 
     ConduitAMQP.publish(message, [exchange: "exchange.test"])
 
-    assert_receive {:subscriber, received_message}
+    assert_receive {:broker, received_message}
 
     assert received_message.source == "queue.test"
     assert get_header(received_message, "routing_key") == "event.test"
