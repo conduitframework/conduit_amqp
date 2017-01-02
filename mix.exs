@@ -3,7 +3,7 @@ defmodule ConduitAmqp.Mixfile do
 
   def project do
     [app: :conduit_amqp,
-     version: "0.2.0",
+     version: "0.3.0",
      elixir: "~> 1.3",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
@@ -48,7 +48,7 @@ defmodule ConduitAmqp.Mixfile do
     [{:amqp, "~> 0.1", hex: :amqp19},
      {:connection, "~> 1.0"},
      {:poolboy, "~> 1.5"},
-     {:conduit, "~> 0.5"},
+     {:conduit, "~> 0.7"},
      {:ex_doc, "~> 0.14", only: :dev},
      {:dialyxir, "~> 0.4", only: :dev},
      {:excoveralls, "~> 0.5", only: :test}]
