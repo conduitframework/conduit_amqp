@@ -11,7 +11,7 @@ defmodule ConduitAMQP.Sub do
 
   def init([conn_pool_name, broker, name, opts]) do
     Process.flag(:trap_exit, true)
-    send(self, :connect)
+    send(self(), :connect)
     {:ok, %{
       status: :disconnected,
       chan: nil,
@@ -37,7 +37,7 @@ defmodule ConduitAMQP.Sub do
 
         {:noreply, %{state | chan: chan, status: :connected}}
       _ ->
-        Process.send_after(self, :connect, @reconnect_after_ms)
+        Process.send_after(self(), :connect, @reconnect_after_ms)
         {:noreply, %{state | chan: nil, status: :disconnected}}
     end
   end
@@ -58,7 +58,7 @@ defmodule ConduitAMQP.Sub do
   def handle_info({:basic_cancel_ok, _}, state), do: {:noreply, state}
 
   def handle_info({:DOWN, _ref, :process, _pid, _reason}, state) do
-    Process.send_after(self, :connect, @reconnect_after_ms)
+    Process.send_after(self(), :connect, @reconnect_after_ms)
     {:noreply, %{state | status: :disconnected}}
   end
 

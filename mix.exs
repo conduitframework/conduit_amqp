@@ -7,17 +7,17 @@ defmodule ConduitAmqp.Mixfile do
      elixir: "~> 1.3",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     deps: deps,
+     deps: deps(),
 
      # Docs
      name: "ConduitAMQP",
      source_url: "https://github.com/conduitframework/conduit_amqp",
      homepage_url: "https://hexdocs.pm/conduit_amqp",
-     docs: docs,
+     docs: docs(),
 
      # Package
      description: "AMQP adapter for Conduit.",
-     package: package,
+     package: package(),
 
      dialyzer: [flags: ["-Werror_handling", "-Wrace_conditions"]],
 

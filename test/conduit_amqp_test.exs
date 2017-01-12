@@ -3,7 +3,7 @@ defmodule ConduitAmqpTest do
   use AMQP
 
   defmodule Broker do
-    def receives(name, message) do
+    def receives(_name, message) do
       send(ConduitAMQPTest, {:broker, message})
 
       message
@@ -20,7 +20,7 @@ defmodule ConduitAmqpTest do
   end
 
   setup do
-    Process.register(self, ConduitAMQPTest)
+    Process.register(self(), ConduitAMQPTest)
 
     :ok
   end

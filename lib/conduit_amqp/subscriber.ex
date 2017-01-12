@@ -12,7 +12,7 @@ defmodule ConduitAMQP.Subscriber do
   def init([chan, source, broker, name, payload, props]) do
     Process.flag(:trap_exit, true)
     Process.monitor(chan.pid)
-    send(self, :process)
+    send(self(), :process)
 
     {:ok, %{chan: chan, source: source, broker: broker, name: name, payload: payload, props: props}}
   end
