@@ -48,7 +48,7 @@ defmodule ConduitAMQP do
     supervise(children, strategy: :one_for_one)
   end
 
-  def publish(message, opts \\ []) do
+  def publish(message, _config, opts \\ []) do
     exchange = Keyword.get(opts, :exchange)
     props = ConduitAMQP.Props.get(message)
 

@@ -47,7 +47,7 @@ defmodule ConduitAmqpTest do
       |> put_destination("event.test")
       |> put_body("test")
 
-    ConduitAMQP.publish(message, [exchange: "exchange.test"])
+    ConduitAMQP.publish(message, [], [exchange: "exchange.test"])
 
     assert_receive {:broker, received_message}
 
