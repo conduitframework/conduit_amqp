@@ -18,7 +18,7 @@ defmodule ConduitAMQP.Sub do
       conn_pool_name: conn_pool_name,
       broker: broker,
       name: name,
-      opts: opts}}
+      opts: expand_opts(opts)}}
   end
 
   def handle_call(:chan, _from, %{status: :connected, chan: chan} = status) do
@@ -34,9 +34,11 @@ defmodule ConduitAMQP.Sub do
         Process.monitor(chan.pid)
         Basic.qos(chan, opts)
         Basic.consume(chan, opts[:from] || Atom.to_string(name))
+        Logger.info "#{inspect self()} Channel opened for subscription #{inspect name}"
 
         {:noreply, %{state | chan: chan, status: :connected}}
       _ ->
+        Logger.error "#{inspect self()} Channel failed to open for subscription #{inspect name}"
         Process.send_after(self(), :connect, @reconnect_after_ms)
         {:noreply, %{state | chan: nil, status: :disconnected}}
     end
@@ -57,15 +59,28 @@ defmodule ConduitAMQP.Sub do
   def handle_info({:basic_cancel, _}, state), do: {:stop, :normal, state}
   def handle_info({:basic_cancel_ok, _}, state), do: {:noreply, state}
 
-  def handle_info({:DOWN, _ref, :process, _pid, _reason}, state) do
+  def handle_info({:DOWN, _ref, :process, _pid, reason}, state) do
+    Logger.error("Channel closed, because #{inspect reason}")
     Process.send_after(self(), :connect, @reconnect_after_ms)
-    {:noreply, %{state | status: :disconnected}}
+    {:noreply, %{state | chan: nil, status: :disconnected}}
   end
 
-  def terminate(_reason, %{chan: chan, status: :connected}) do
+  def terminate(reason, %{chan: chan, status: :connected}) do
+    Logger.info("#{inspect self()} Closing channel, because #{inspect reason}")
     Channel.close(chan)
+
+    :ok
   catch
     _, _ -> :ok
   end
   def terminate(_reason, _state), do: :ok
+
+  defp expand_opts(opts) do
+    from = opts[:from]
+    if is_function(from) do
+      Keyword.put(opts, :from, from.(opts))
+    else
+      opts
+    end
+  end
 end

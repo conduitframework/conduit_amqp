@@ -26,25 +26,26 @@ defmodule ConduitAMQP.Conn do
 
     case AMQP.Connection.open(connect_opts) do
       {:ok, conn} ->
-        Logger.info("Connected via AMQP!")
+        Logger.info("#{inspect self()} Connected via AMQP!")
         Process.monitor(conn.pid)
         {:ok, %{state | conn: conn}}
       {:error, _reason} ->
-        Logger.error("Could not connect via AMQP!")
+        Logger.error("#{inspect self()} Connection failed via AMQP!")
         {:backoff, @reconnect_after_ms, state}
     end
   end
 
-  def handle_info({:DOWN, _ref, :process, pid, _reason},
+  def handle_info({:DOWN, _ref, :process, pid, reason},
     %{conn: %{pid: conn_pid}} = state)
   when pid == conn_pid do
-    Logger.error "Lost AMQP connection. Attempting to reconnect..."
+    Logger.error "#{inspect self()} Lost AMQP connection, because #{inspect reason}"
+    Logger.info "#{inspect self()} Attempting to reconnect..."
     {:connect, :reconnect, %{state | conn: nil}}
   end
 
   def terminate(_reason, %{conn: nil}), do: :ok
   def terminate(_reason, %{conn: conn}) do
-    Logger.info "AMQP connection terminating"
+    Logger.info "#{inspect self()} AMQP connection terminating"
 
     AMQP.Connection.close(conn)
   catch _, _ ->
