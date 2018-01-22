@@ -24,7 +24,8 @@ defmodule ConduitAMQP do
   """
 
   def start_link(broker, topology, subscribers, opts) do
-    Supervisor.start_link(__MODULE__, [broker, topology, subscribers, opts], name: __MODULE__)
+    name = Module.concat(broker, __MODULE__)
+    Supervisor.start_link(__MODULE__, [broker, topology, subscribers, opts], name: name)
   end
 
   def init([broker, topology, subscribers, opts]) do
