@@ -32,17 +32,21 @@ defmodule ConduitAMQP.Topology do
       Logger.info("Declaring queue #{queue}")
       Queue.declare(chan, queue, opts)
 
-      case opts[:from] do
-        nil ->
-          Logger.info("Binding queue #{queue} to exchange #{opts[:exchange]}")
-          Queue.bind(chan, queue, opts[:exchange], opts)
-        from ->
-          List.wrap(from)
-          |> Enum.each(fn routing_key ->
-            Logger.info("Binding queue #{queue} to exchange #{opts[:exchange]} using routing key #{routing_key}")
-            Queue.bind(chan, queue, opts[:exchange], Keyword.merge([routing_key: routing_key], opts))
-          end)
-      end
+      bind_queue(chan, queue, opts[:from], opts[:exchange], opts)
     end)
+  end
+
+  defp bind_queue(_, _, nil, nil, _), do: :ok
+  defp bind_queue(chan, queue, nil, exchange, opts) do
+    Logger.info("Binding queue #{queue} to exchange #{exchange}")
+    Queue.bind(chan, queue, exchange, opts)
+  end
+  defp bind_queue(chan, queue, from, exchange, opts) do
+    List.wrap(from)
+    |> Enum.each(fn routing_key ->
+      Logger.info("Binding queue #{queue} to exchange #{exchange} using routing key #{routing_key}")
+      Queue.bind(chan, queue, exchange, Keyword.merge([routing_key: routing_key], opts))
+    end)
+    :ok
   end
 end

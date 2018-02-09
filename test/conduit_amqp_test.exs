@@ -10,7 +10,12 @@ defmodule ConduitAmqpTest do
     end
   end
 
-  @topology [{:queue, "queue.test", from: ["#.test"], exchange: "exchange.test"}, {:exchange, "exchange.test", []}]
+  @topology [
+    {:exchange, "exchange.test", []},
+    {:queue, "queue.routing_key.test", from: ["#.test"], exchange: "exchange.test"},
+    {:queue, "queue.no_key.test", exchange: "exchange.test"},
+    {:queue, "queue.no_bind.test", []}
+  ]
   @subscribers %{queue_test: [from: "queue.test"]}
   setup_all do
     opts = Application.get_env(:conduit, ConduitAMQPTest)
@@ -35,8 +40,10 @@ defmodule ConduitAmqpTest do
 
   test "it configures the topology" do
     with_chan fn chan ->
-      assert {:ok, %{queue: "queue.test"}} = Queue.declare(chan, "queue.test", passive: true)
       assert :ok = Exchange.topic(chan, "exchange.test", passive: true)
+      assert {:ok, %{queue: "queue.routing_key.test"}} = Queue.declare(chan, "queue.routing_key.test", passive: true)
+      assert {:ok, %{queue: "queue.no_key.test"}} = Queue.declare(chan, "queue.no_key.test", passive: true)
+      assert {:ok, %{queue: "queue.no_bind.test"}} = Queue.declare(chan, "queue.no_bind.test", passive: true)
     end
   end
 
