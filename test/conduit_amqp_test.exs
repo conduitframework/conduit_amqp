@@ -14,7 +14,8 @@ defmodule ConduitAmqpTest do
     {:exchange, "exchange.test", []},
     {:queue, "queue.routing_key.test", from: ["#.test"], exchange: "exchange.test"},
     {:queue, "queue.no_key.test", exchange: "exchange.test"},
-    {:queue, "queue.no_bind.test", []}
+    {:queue, "queue.no_bind.test", []},
+    {:queue, "queue.test", from: ["#.test"], exchange: "exchange.test"}
   ]
   @subscribers %{queue_test: [from: "queue.test"]}
   setup_all do
