@@ -26,6 +26,7 @@ defmodule ConduitAMQP.Pub do
   def handle_call(:chan, _from, %{status: :connected, chan: chan} = status) do
     {:reply, {:ok, chan}, status}
   end
+
   def handle_call(:chan, _from, %{status: :disconnected} = status) do
     {:reply, {:error, :disconnected}, status}
   end
@@ -34,28 +35,30 @@ defmodule ConduitAMQP.Pub do
     case ConduitAMQP.with_conn(&Channel.open/1) do
       {:ok, chan} ->
         Process.monitor(chan.pid)
-        Logger.info "#{inspect self()} Channel opened for publishing"
+        Logger.info("#{inspect(self())} Channel opened for publishing")
         {:noreply, %{state | chan: chan, status: :connected}}
+
       _ ->
-        Logger.error "#{inspect self()} Channel failed to open for publishing"
+        Logger.error("#{inspect(self())} Channel failed to open for publishing")
         Process.send_after(self(), :connect, @reconnect_after_ms)
         {:noreply, %{state | chan: nil, status: :disconnected}}
     end
   end
 
   def handle_info({:DOWN, _ref, :process, _pid, reason}, state) do
-    Logger.error("Channel closed, because #{inspect reason}")
+    Logger.error("Channel closed, because #{inspect(reason)}")
     Process.send_after(self(), :connect, @reconnect_after_ms)
     {:noreply, %{state | status: :disconnected}}
   end
 
   def terminate(reason, %{chan: chan, status: :connected}) do
-    Logger.info("#{inspect self()} Closing channel, because #{inspect reason}")
+    Logger.info("#{inspect(self())} Closing channel, because #{inspect(reason)}")
     Channel.close(chan)
 
     :ok
   catch
     _, _ -> :ok
   end
+
   def terminate(_reason, _state), do: :ok
 end

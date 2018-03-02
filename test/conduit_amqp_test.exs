@@ -40,22 +40,23 @@ defmodule ConduitAmqpTest do
   end
 
   test "it configures the topology" do
-    with_chan fn chan ->
+    with_chan(fn chan ->
       assert :ok = Exchange.topic(chan, "exchange.test", passive: true)
       assert {:ok, %{queue: "queue.routing_key.test"}} = Queue.declare(chan, "queue.routing_key.test", passive: true)
       assert {:ok, %{queue: "queue.no_key.test"}} = Queue.declare(chan, "queue.no_key.test", passive: true)
       assert {:ok, %{queue: "queue.no_bind.test"}} = Queue.declare(chan, "queue.no_bind.test", passive: true)
-    end
+    end)
   end
 
   test "a sent message can be received" do
     import Conduit.Message
+
     message =
       %Conduit.Message{}
       |> put_destination("event.test")
       |> put_body("test")
 
-    ConduitAMQP.publish(message, [], [exchange: "exchange.test"])
+    ConduitAMQP.publish(message, [], exchange: "exchange.test")
 
     assert_receive {:broker, received_message}
 

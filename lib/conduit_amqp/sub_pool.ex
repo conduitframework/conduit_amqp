@@ -8,9 +8,10 @@ defmodule ConduitAMQP.SubPool do
   def init([conn_pool_name, broker, subscribers, adapter_opts]) do
     import Supervisor.Spec
 
-    children = Enum.map(subscribers, fn {name, opts} ->
-      worker(ConduitAMQP.Sub, [conn_pool_name, broker, name, opts ++ adapter_opts], id: name)
-    end)
+    children =
+      Enum.map(subscribers, fn {name, opts} ->
+        worker(ConduitAMQP.Sub, [conn_pool_name, broker, name, opts ++ adapter_opts], id: name)
+      end)
 
     supervise(children, strategy: :one_for_one)
   end

@@ -56,6 +56,7 @@ defmodule ConduitAMQP do
     case get_chan(0, @pool_size) do
       {:ok, chan} ->
         Basic.publish(chan, exchange, message.destination, message.body, props)
+
       {:error, reason} ->
         {:error, reason}
     end
@@ -63,17 +64,21 @@ defmodule ConduitAMQP do
 
   def with_conn(fun) when is_function(fun, 1) do
     case get_conn(0, @pool_size) do
-      {:ok, conn}      -> fun.(conn)
+      {:ok, conn} -> fun.(conn)
       {:error, reason} -> {:error, reason}
     end
   end
 
   defp get_conn(retry_count, max_retry_count) do
     case :poolboy.transaction(ConduitAMQP.ConnPool, &GenServer.call(&1, :conn)) do
-      {:ok, conn}      -> {:ok, conn}
+      {:ok, conn} ->
+        {:ok, conn}
+
       {:error, _reason} when retry_count < max_retry_count ->
         get_conn(retry_count + 1, max_retry_count)
-      {:error, reason} -> {:error, reason}
+
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 
@@ -81,8 +86,10 @@ defmodule ConduitAMQP do
     case :poolboy.transaction(ConduitAMQP.PubPool, &GenServer.call(&1, :chan)) do
       {:ok, chan} ->
         {:ok, chan}
+
       {:error, _reason} when retry_count < max_retry_count ->
         get_chan(retry_count + 1, max_retry_count)
+
       {:error, reason} ->
         {:error, reason}
     end

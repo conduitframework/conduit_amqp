@@ -50,6 +50,7 @@ defmodule ConduitAMQP.Props do
   end
 
   defp put_message_headers(message, nil), do: message
+
   defp put_message_headers(message, headers) do
     Enum.reduce(headers, message, fn {key, _type, value}, mess ->
       put_header(mess, key, value)
@@ -65,7 +66,17 @@ defmodule ConduitAMQP.Props do
     |> Enum.into(%{})
   end
 
-  @passed_as_props ["delivery_mode", "priority", "reply_to", "expiration", "type", "user_id", "cluster_id", "mandatory", "immediate"]
+  @passed_as_props [
+    "delivery_mode",
+    "priority",
+    "reply_to",
+    "expiration",
+    "type",
+    "user_id",
+    "cluster_id",
+    "mandatory",
+    "immediate"
+  ]
   defp get_prop_headers(message) do
     Map.drop(message.headers, @passed_as_props)
     |> Enum.reduce([], fn {key, value}, list ->

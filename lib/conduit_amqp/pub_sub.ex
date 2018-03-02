@@ -1,10 +1,10 @@
 defmodule ConduitAMQP.PubSub do
   use Supervisor
   use AMQP
+
   @moduledoc """
   Supervisor for subscriber and publisher pools. Sets up queues and exchanges that are configured.
   """
-
 
   def start_link(broker, topology, subscribers, opts) do
     Supervisor.start_link(__MODULE__, [broker, topology, subscribers, opts], name: __MODULE__)

@@ -1,5 +1,6 @@
 defmodule ConduitAMQP.Subscribers do
   use Supervisor
+
   @moduledoc """
   Supervisor for subscribers that process messages.
   """
