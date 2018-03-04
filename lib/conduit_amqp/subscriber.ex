@@ -17,8 +17,8 @@ defmodule ConduitAMQP.Subscriber do
     {:ok, %{chan: chan, source: source, broker: broker, name: name, payload: payload, props: props}}
   end
 
-  def handle_info(:process, state) do
-    %{chan: chan, source: source, broker: broker, name: name, payload: payload, props: props} = state
+  def handle_info(:process, %{chan: chan, props: props} = state) do
+    %{source: source, broker: broker, name: name, payload: payload} = state
     message = build_message(source, payload, props)
 
     case broker.receives(name, message) do
