@@ -30,6 +30,12 @@ This package can be installed as:
 config :my_app, MyApp.Broker,
   adapter: ConduitAMQP,
   url: "amqp://my_app:secret@my-rabbit-host.com"
+
+# Stop lager redirecting :error_logger messages
+config :lager, :error_logger_redirect, false
+
+# Stop lager removing Logger's :error_logger handler
+config :lager, :error_logger_whitelist, [Logger.ErrorHandler]
 ```
 
 For the full set of options, see `ConduitAQMP`.
@@ -62,7 +68,6 @@ end
 ```
 
 ## Configuring Queues
-
 
 You can define queues with the `queue` macro in the
 `configure` block of your Broker. The `queue` macro accepts
