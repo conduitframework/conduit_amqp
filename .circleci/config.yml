@@ -1,0 +1,62 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/app
+    docker:
+      - image: circleci/elixir:1.6.2
+        environment:
+          - QUEUE_URL=amqp://localhost:5672
+      - image: rabbitmq:3.7.3-management
+    steps:
+      - checkout
+
+      - run: cp mix.lock mix.lock.frozen
+      - run: mix local.hex --force
+      - run: mix local.rebar --force
+
+      - restore_cache:
+          keys:
+            - v6-deps-{{checksum "mix.lock.frozen"}}
+            - v6-deps-{{.Branch}}-{{.Environment.CIRCLE_PREVIOUS_BUILD_NUM}}
+            - v6-deps-develop
+      - run: mix deps.get
+      - save_cache:
+          key: v6-deps-{{checksum "mix.lock.frozen"}}
+          paths:
+            - deps
+      - save_cache:
+          key: v6-deps-{{.Branch}}-{{.BuildNum}}
+          paths:
+            - deps
+      - save_cache:
+          key: v6-deps-{{.Branch}}
+          paths:
+            - deps
+
+      - restore_cache:
+          keys:
+            - v6-build-{{.Branch}}-{{.Environment.CIRCLE_PREVIOUS_BUILD_NUM}}
+            - v6-build-{{checksum "mix.lock.frozen"}}
+            - v6-build-develop
+      - run: mix compile
+      - run: MIX_ENV=test mix compile
+      - run: MIX_ENV=prod mix compile
+      - run: mix dialyzer --plt --no-compile
+      - save_cache:
+          key: v6-build-{{checksum "mix.lock.frozen"}}
+          paths:
+            - _build
+      - save_cache:
+          key: v6-build-{{.Branch}}-{{.BuildNum}}
+          paths:
+            - _build
+      - save_cache:
+          key: v6-build-{{.Branch}}
+          paths:
+            - _build
+
+      - run: mix coveralls.circle
+      - run: mix dialyzer --halt-exit-status --no-check --no-compile
+      - run: mix format --check-formatted
+      - store_test_results:
+          path: _build/test/lib/conduit_amqp/
