@@ -24,7 +24,10 @@ defmodule ConduitAMQP.Topology do
   defp configure_exchanges(chan, exchanges) do
     Enum.each(exchanges, fn {exchange, opts} ->
       Logger.info("Declaring exchange #{exchange}")
-      Exchange.declare(chan, exchange, opts[:type] || :topic, opts)
+
+      with {:error, reason} <- Exchange.declare(chan, exchange, opts[:type] || :topic, opts) do
+        Logger.error("Failed declaring exchange #{exchange}: #{inspect(reason)}")
+      end
     end)
   end
 
@@ -33,9 +36,13 @@ defmodule ConduitAMQP.Topology do
   defp configure_queues(chan, queues) do
     Enum.each(queues, fn {queue, opts} ->
       Logger.info("Declaring queue #{queue}")
-      Queue.declare(chan, queue, opts)
 
-      bind_queue(chan, queue, opts[:from], opts[:exchange], opts)
+      with {:ok, _} <- Queue.declare(chan, queue, opts) do
+        bind_queue(chan, queue, opts[:from], opts[:exchange], opts)
+      else
+        {:error, reason} ->
+          Logger.error("Failed declaring queue #{queue}: #{inspect(reason)}")
+      end
     end)
   end
 
@@ -43,14 +50,20 @@ defmodule ConduitAMQP.Topology do
 
   defp bind_queue(chan, queue, nil, exchange, opts) do
     Logger.info("Binding queue #{queue} to exchange #{exchange}")
-    Queue.bind(chan, queue, exchange, opts)
+
+    with {:error, reason} <- Queue.bind(chan, queue, exchange, opts) do
+      Logger.error("Failed binding queue #{queue} to exchange #{exchange}: #{inspect(reason)}")
+    end
   end
 
   defp bind_queue(chan, queue, from, exchange, opts) do
     List.wrap(from)
     |> Enum.each(fn routing_key ->
       Logger.info("Binding queue #{queue} to exchange #{exchange} using routing key #{routing_key}")
-      Queue.bind(chan, queue, exchange, Keyword.merge([routing_key: routing_key], opts))
+
+      with {:error, reason} <- Queue.bind(chan, queue, exchange, Keyword.merge([routing_key: routing_key], opts)) do
+        Logger.error("Failed binding queue #{queue} to exchange #{exchange}: #{inspect(reason)}")
+      end
     end)
 
     :ok

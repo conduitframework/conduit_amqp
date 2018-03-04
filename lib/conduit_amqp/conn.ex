@@ -30,8 +30,8 @@ defmodule ConduitAMQP.Conn do
         Process.monitor(conn.pid)
         {:ok, %{state | conn: conn}}
 
-      {:error, _reason} ->
-        Logger.error("#{inspect(self())} Connection failed via AMQP!")
+      {:error, reason} ->
+        Logger.error("#{inspect(self())} Connection failed via AMQP! #{inspect(reason)}")
         {:backoff, @reconnect_after_ms, state}
     end
   end

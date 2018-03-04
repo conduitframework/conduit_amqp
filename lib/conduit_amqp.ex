@@ -63,9 +63,8 @@ defmodule ConduitAMQP do
   end
 
   def with_conn(fun) when is_function(fun, 1) do
-    case get_conn(0, @pool_size) do
-      {:ok, conn} -> fun.(conn)
-      {:error, reason} -> {:error, reason}
+    with {:ok, conn} <- get_conn(0, @pool_size) do
+      fun.(conn)
     end
   end
 

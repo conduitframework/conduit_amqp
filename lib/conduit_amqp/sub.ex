@@ -42,8 +42,8 @@ defmodule ConduitAMQP.Sub do
 
         {:noreply, %{state | chan: chan, status: :connected}}
 
-      _ ->
-        Logger.error("#{inspect(self())} Channel failed to open for subscription #{inspect(name)}")
+      {:error, reason} ->
+        Logger.error("#{inspect(self())} Channel failed to open for subscription #{inspect(name)}: #{inspect(reason)}")
         Process.send_after(self(), :connect, @reconnect_after_ms)
         {:noreply, %{state | chan: nil, status: :disconnected}}
     end

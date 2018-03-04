@@ -38,8 +38,8 @@ defmodule ConduitAMQP.Pub do
         Logger.info("#{inspect(self())} Channel opened for publishing")
         {:noreply, %{state | chan: chan, status: :connected}}
 
-      _ ->
-        Logger.error("#{inspect(self())} Channel failed to open for publishing")
+      {:error, reason} ->
+        Logger.error("#{inspect(self())} Channel failed to open for publishing: #{inspect(reason)}")
         Process.send_after(self(), :connect, @reconnect_after_ms)
         {:noreply, %{state | chan: nil, status: :disconnected}}
     end
