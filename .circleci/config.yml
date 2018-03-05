@@ -18,7 +18,7 @@ jobs:
           keys:
             - v6-deps-{{checksum "mix.lock.frozen"}}
             - v6-deps-{{.Branch}}-{{.Environment.CIRCLE_PREVIOUS_BUILD_NUM}}
-            - v6-deps-develop
+            - v6-deps-master
       - run: mix deps.get
       - save_cache:
           key: v6-deps-{{checksum "mix.lock.frozen"}}
@@ -37,7 +37,7 @@ jobs:
           keys:
             - v6-build-{{.Branch}}-{{.Environment.CIRCLE_PREVIOUS_BUILD_NUM}}
             - v6-build-{{checksum "mix.lock.frozen"}}
-            - v6-build-develop
+            - v6-build-master
       - run: mix compile
       - run: MIX_ENV=test mix compile
       - run: MIX_ENV=prod mix compile
