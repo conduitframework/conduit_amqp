@@ -1,4 +1,7 @@
 defmodule ConduitAMQP.Props do
+  @moduledoc """
+  Converts between a Conduit.Message and AMQP message
+  """
   import Conduit.Message
 
   def put(message, props) do
@@ -78,7 +81,8 @@ defmodule ConduitAMQP.Props do
     "immediate"
   ]
   defp get_prop_headers(message) do
-    Map.drop(message.headers, @passed_as_props)
+    message.headers
+    |> Map.drop(@passed_as_props)
     |> Enum.reduce([], fn {key, value}, list ->
       put_present(list, key, value)
     end)

@@ -1,4 +1,7 @@
 defmodule ConduitAMQP.Subscriber do
+  @moduledoc """
+  Runs the pipeline for an incoming message and acks or nacks the result
+  """
   use GenServer
   use AMQP
   import Conduit.Message

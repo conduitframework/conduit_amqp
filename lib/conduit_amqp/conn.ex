@@ -1,4 +1,7 @@
 defmodule ConduitAMQP.Conn do
+  @moduledoc """
+  Manages an AMQP connection
+  """
   use Connection
   require Logger
 

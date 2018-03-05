@@ -1,4 +1,7 @@
 defmodule ConduitAMQP.SubPool do
+  @moduledoc """
+  Supervises all the subscriptions to queues
+  """
   use Supervisor
 
   def start_link(conn_pool_name, broker, subscribers, opts) do

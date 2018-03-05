@@ -1,4 +1,7 @@
 defmodule ConduitAMQP.Sub do
+  @moduledoc """
+  Manages a subscription to a channel
+  """
   use GenServer
   use AMQP
   require Logger

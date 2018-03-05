@@ -57,7 +57,8 @@ defmodule ConduitAMQP.Topology do
   end
 
   defp bind_queue(chan, queue, from, exchange, opts) do
-    List.wrap(from)
+    from
+    |> List.wrap()
     |> Enum.each(fn routing_key ->
       Logger.info("Binding queue #{queue} to exchange #{exchange} using routing key #{routing_key}")
 

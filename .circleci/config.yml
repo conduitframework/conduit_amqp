@@ -58,5 +58,6 @@ jobs:
       - run: mix coveralls.circle
       - run: mix dialyzer --halt-exit-status --no-check --no-compile
       - run: mix format --check-formatted
+      - run: mix credo --all
       - store_test_results:
           path: _build/test/lib/conduit_amqp/
