@@ -6,33 +6,34 @@ defmodule ConduitAMQP.PubSub do
   Supervisor for subscriber and publisher pools. Sets up queues and exchanges that are configured.
   """
 
+  def child_spec([broker, _, _, _] = args) do
+    %{
+      id: name(broker),
+      start: {__MODULE__, :start_link, args},
+      type: :supervisor
+    }
+  end
+
   def start_link(broker, topology, subscribers, opts) do
     Supervisor.start_link(__MODULE__, [broker, topology, subscribers, opts], name: __MODULE__)
   end
 
   @doc false
   def init([broker, topology, subscribers, opts]) do
-    import Supervisor.Spec
-
-    case ConduitAMQP.with_conn(&Channel.open/1) do
+    case ConduitAMQP.with_conn(broker, &Channel.open/1) do
       {:ok, chan} -> configure(chan, topology)
     end
 
-    pub_pool_opts = [
-      name: {:local, ConduitAMQP.PubPool},
-      worker_module: ConduitAMQP.Pub,
-      size: opts[:pub_pool_size] || 5,
-      max_overflow: 0
-    ]
-
-    sub_pool_opts = [ConduitAMQP.ConnPool, broker, subscribers, opts]
-
     children = [
-      :poolboy.child_spec(ConduitAMQP.PubPool, pub_pool_opts, ConduitAMQP.ConnPool),
-      supervisor(ConduitAMQP.SubPool, sub_pool_opts)
+      {ConduitAMQP.PubPool, [broker, opts]},
+      {ConduitAMQP.SubPool, [broker, subscribers, opts]}
     ]
 
-    supervise(children, strategy: :one_for_one)
+    Supervisor.init(children, strategy: :one_for_one)
+  end
+
+  def name(broker) do
+    Module.concat(broker, Adapter.PubSub)
   end
 
   defp configure(chan, topology) do

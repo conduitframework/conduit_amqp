@@ -1,8 +1,19 @@
 defmodule ConduitAmqpTest do
+  @moduledoc false
   use ExUnit.Case
   use AMQP
 
   defmodule Broker do
+    @moduledoc false
+    def receives(_name, message) do
+      send(ConduitAMQPTest, {:broker, message})
+
+      message
+    end
+  end
+
+  defmodule OtherBroker do
+    @moduledoc false
     def receives(_name, message) do
       send(ConduitAMQPTest, {:broker, message})
 
@@ -33,7 +44,7 @@ defmodule ConduitAmqpTest do
 
   defmacrop with_chan(fun) do
     quote do
-      case ConduitAMQP.with_conn(&Channel.open/1) do
+      case ConduitAMQP.with_conn(Broker, &Channel.open/1) do
         {:ok, chan} -> unquote(fun).(chan)
       end
     end
@@ -56,12 +67,17 @@ defmodule ConduitAmqpTest do
       |> put_destination("event.test")
       |> put_body("test")
 
-    ConduitAMQP.publish(message, [], exchange: "exchange.test")
+    ConduitAMQP.publish(Broker, message, [], exchange: "exchange.test")
 
     assert_receive {:broker, received_message}
 
     assert received_message.source == "queue.test"
     assert get_header(received_message, "routing_key") == "event.test"
     assert received_message.body == "test"
+  end
+
+  test "can run two adapters at the same time" do
+    opts = Application.get_env(:conduit, ConduitAMQPTest)
+    start_supervised({ConduitAMQP, [OtherBroker, @topology, @subscribers, opts]})
   end
 end

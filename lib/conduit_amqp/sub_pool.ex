@@ -4,18 +4,28 @@ defmodule ConduitAMQP.SubPool do
   """
   use Supervisor
 
-  def start_link(conn_pool_name, broker, subscribers, opts) do
-    Supervisor.start_link(__MODULE__, [conn_pool_name, broker, subscribers, opts], name: __MODULE__)
+  def child_spec([broker, _, _] = args) do
+    %{
+      id: name(broker),
+      start: {__MODULE__, :start_link, args},
+      type: :supervisor
+    }
   end
 
-  def init([conn_pool_name, broker, subscribers, adapter_opts]) do
-    import Supervisor.Spec
+  def start_link(broker, subscribers, opts) do
+    Supervisor.start_link(__MODULE__, [broker, subscribers, opts], name: __MODULE__)
+  end
 
+  def init([broker, subscribers, adapter_opts]) do
     children =
       Enum.map(subscribers, fn {name, opts} ->
-        worker(ConduitAMQP.Sub, [conn_pool_name, broker, name, opts ++ adapter_opts], id: name)
+        {ConduitAMQP.Sub, [broker, name, opts ++ adapter_opts]}
       end)
 
-    supervise(children, strategy: :one_for_one)
+    Supervisor.init(children, strategy: :one_for_one)
+  end
+
+  def name(broker) do
+    Module.concat(broker, Adapter.SubPool)
   end
 end

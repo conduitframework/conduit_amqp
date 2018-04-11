@@ -8,11 +8,19 @@ defmodule ConduitAMQP.Sub do
 
   @reconnect_after_ms 5_000
 
-  def start_link(conn_pool_name, broker, name, opts) do
-    GenServer.start_link(__MODULE__, [conn_pool_name, broker, name, opts])
+  def child_spec([broker, name, _] = args) do
+    %{
+      id: name(broker, name),
+      start: {__MODULE__, :start_link, args},
+      type: :worker
+    }
   end
 
-  def init([conn_pool_name, broker, name, opts]) do
+  def start_link(broker, name, opts) do
+    GenServer.start_link(__MODULE__, [broker, name, opts])
+  end
+
+  def init([broker, name, opts]) do
     Process.flag(:trap_exit, true)
     send(self(), :connect)
 
@@ -20,11 +28,14 @@ defmodule ConduitAMQP.Sub do
      %{
        status: :disconnected,
        chan: nil,
-       conn_pool_name: conn_pool_name,
        broker: broker,
        name: name,
        opts: expand_opts(opts)
      }}
+  end
+
+  def name(broker, queue) do
+    {Module.concat(broker, Adapter.Sub), queue}
   end
 
   def handle_call(:chan, _from, %{status: :connected, chan: chan} = status) do
@@ -35,8 +46,8 @@ defmodule ConduitAMQP.Sub do
     {:reply, {:error, :disconnected}, status}
   end
 
-  def handle_info(:connect, %{status: :disconnected, name: name, opts: opts} = state) do
-    case ConduitAMQP.with_conn(&Channel.open/1) do
+  def handle_info(:connect, %{status: :disconnected, broker: broker, name: name, opts: opts} = state) do
+    case ConduitAMQP.with_conn(broker, &Channel.open/1) do
       {:ok, chan} ->
         Process.monitor(chan.pid)
         Basic.qos(chan, opts)
@@ -54,7 +65,7 @@ defmodule ConduitAMQP.Sub do
 
   def handle_info({:basic_deliver, payload, props}, %{chan: chan, broker: broker, name: name, opts: opts} = state) do
     source = opts[:from] || Atom.to_string(name)
-    {:ok, _pid} = ConduitAMQP.Subscribers.start_subscriber(chan, source, broker, name, payload, props)
+    {:ok, _pid} = ConduitAMQP.Tasks.run(broker, chan, name, source, payload, props)
 
     {:noreply, state}
   end

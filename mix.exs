@@ -49,7 +49,7 @@ defmodule ConduitAmqp.Mixfile do
       {:amqp, "~> 1.0 and >= 1.0.2"},
       {:connection, "~> 1.0"},
       {:poolboy, "~> 1.5"},
-      {:conduit, "~> 0.7"},
+      {:conduit, "~> 0.11"},
       {:ex_doc, "~> 0.14", only: :dev},
       {:dialyxir, "~> 0.4", only: :dev},
       {:junit_formatter, "~> 2.0", only: :test},

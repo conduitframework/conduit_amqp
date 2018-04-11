@@ -12,15 +12,16 @@ defmodule ConduitAMQP.Pub do
   @doc """
   Starts the server
   """
-  def start_link(conn_pool_name) do
-    GenServer.start_link(__MODULE__, [conn_pool_name])
+  def start_link([broker]) do
+    GenServer.start_link(__MODULE__, broker)
   end
 
   @doc false
-  def init([conn_pool_name]) do
+  def init(broker) do
     Process.flag(:trap_exit, true)
     send(self(), :connect)
-    {:ok, %{status: :disconnected, chan: nil, conn_pool_name: conn_pool_name}}
+    conn_pool_name = ConduitAMQP.ConnPool.name(broker)
+    {:ok, %{status: :disconnected, chan: nil, broker: broker, conn_pool_name: conn_pool_name}}
   end
 
   def handle_call(:chan, _from, %{status: :connected, chan: chan} = status) do
@@ -31,8 +32,8 @@ defmodule ConduitAMQP.Pub do
     {:reply, {:error, :disconnected}, status}
   end
 
-  def handle_info(:connect, %{status: :disconnected} = state) do
-    case ConduitAMQP.with_conn(&Channel.open/1) do
+  def handle_info(:connect, %{status: :disconnected, broker: broker} = state) do
+    case ConduitAMQP.with_conn(broker, &Channel.open/1) do
       {:ok, chan} ->
         Process.monitor(chan.pid)
         Logger.info("#{inspect(self())} Channel opened for publishing")
