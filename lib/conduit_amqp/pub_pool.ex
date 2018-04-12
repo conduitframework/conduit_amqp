@@ -1,4 +1,8 @@
 defmodule ConduitAMQP.PubPool do
+  @moduledoc """
+  Supervises the pool of channels for publishing
+  """
+
   def child_spec([broker, opts]) do
     pool_name = name(broker)
 

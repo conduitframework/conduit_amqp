@@ -72,12 +72,12 @@
         # If you don't want TODO comments to cause `mix credo` to fail, just
         # set this value to 0 (zero).
         #
-        {Credo.Check.Design.TagTODO, exit_status: 2},
+        {Credo.Check.Design.TagTODO, false},
         {Credo.Check.Design.TagFIXME},
 
         {Credo.Check.Readability.FunctionNames},
         {Credo.Check.Readability.LargeNumbers},
-        {Credo.Check.Readability.MaxLineLength, priority: :low, max_length: 80},
+        {Credo.Check.Readability.MaxLineLength, priority: :low, max_length: 120},
         {Credo.Check.Readability.ModuleAttributeNames},
         {Credo.Check.Readability.ModuleDoc},
         {Credo.Check.Readability.ModuleNames},
@@ -132,11 +132,7 @@
 
         # Deprecated checks (these will be deleted after a grace period)
         #
-        {Credo.Check.Readability.Specs, false},
-        {Credo.Check.Warning.NameRedeclarationByAssignment, false},
-        {Credo.Check.Warning.NameRedeclarationByCase, false},
-        {Credo.Check.Warning.NameRedeclarationByDef, false},
-        {Credo.Check.Warning.NameRedeclarationByFn, false},
+        {Credo.Check.Readability.Specs, false}
 
         # Custom checks can be created using `mix credo.gen.check`.
         #

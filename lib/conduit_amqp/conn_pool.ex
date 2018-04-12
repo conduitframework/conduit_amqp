@@ -1,4 +1,7 @@
 defmodule ConduitAMQP.ConnPool do
+  @moduledoc """
+  Supervises the pool of connections to message queue
+  """
   @pool_size 5
 
   def child_spec([broker, opts]) do
