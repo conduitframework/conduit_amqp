@@ -67,16 +67,16 @@ defmodule ConduitAMQP.Sub do
     source = opts[:from] || Atom.to_string(name)
     {:ok, _pid} = ConduitAMQP.Tasks.run(broker, chan, name, source, payload, props)
 
-    {:noreply, state}
+    {:noreply, state, :hibernate}
   end
 
   def handle_info({:basic_consume_ok, _}, %{name: name, opts: opts} = state) do
     Logger.info("Subscribed to queue #{opts[:from] || name}")
-    {:noreply, state}
+    {:noreply, state, :hibernate}
   end
 
   def handle_info({:basic_cancel, _}, state), do: {:stop, :normal, state}
-  def handle_info({:basic_cancel_ok, _}, state), do: {:noreply, state}
+  def handle_info({:basic_cancel_ok, _}, state), do: {:noreply, state, :hibernate}
 
   def handle_info({:DOWN, _ref, :process, _pid, reason}, state) do
     Logger.error("Channel closed, because #{inspect(reason)}")
