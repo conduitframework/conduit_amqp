@@ -30,7 +30,7 @@ defmodule ConduitAMQP.Sub do
        chan: nil,
        broker: broker,
        name: name,
-       opts: expand_opts(opts)
+       opts: opts
      }}
   end
 
@@ -94,14 +94,4 @@ defmodule ConduitAMQP.Sub do
   end
 
   def terminate(_reason, _state), do: :ok
-
-  defp expand_opts(opts) do
-    from = opts[:from]
-
-    if is_function(from) do
-      Keyword.put(opts, :from, from.(opts))
-    else
-      opts
-    end
-  end
 end

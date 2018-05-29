@@ -38,7 +38,7 @@ config :lager, :error_logger_redirect, false
 config :lager, :error_logger_whitelist, [Logger.ErrorHandler]
 ```
 
-For the full set of options, see `ConduitAQMP`.
+For the full set of options, see [ConduitAQMP](https://hexdocs.pm/conduit_amqp/ConduitAMQP.html).
 
 ## Configuring Exchanges
 
@@ -48,11 +48,11 @@ the name of the exchange and options for the exchange.
 
 ### Options
 
-  * `:type`: Either `:topic`, `:fanout`, `:direct`, or `:headers`. Defaults to `:topic`.
-  * `:durable`: If set, keeps the Exchange between restarts of the broker. Defaults to `false`.
-  * `:auto_delete`: If set, deletes the Exchange once all queues unbind from it. Defaults to `false`.
-  * `:passive`: If set, returns an error if the Exchange does not already exist. Defaults to `false`.
-  * `:internal:` If set, the exchange may not be used directly by publishers. Defaults to `false`.
+  * `:type` - Either `:topic`, `:fanout`, `:direct`, or `:headers`. Defaults to `:topic`.
+  * `:durable` - If set, keeps the Exchange between restarts of the broker. Defaults to `false`.
+  * `:auto_delete` - If set, deletes the Exchange once all queues unbind from it. Defaults to `false`.
+  * `:passive` - If set, returns an error if the Exchange does not already exist. Defaults to `false`.
+  * `:internal` - If set, the exchange may not be used directly by publishers. Defaults to `false`.
 
 
 ### Example
@@ -76,7 +76,7 @@ the name of the queue and options for the exchange.
 ### Options
 
   * `:durable` - If set, keeps the Queue between restarts of the broker. Defaults to `false`.
-  * `:auto-delete` - If set, deletes the Queue once all subscribers disconnect. Defaults to `false`.
+  * `:auto_delete` - If set, deletes the Queue once all subscribers disconnect. Defaults to `false`.
   * `:exclusive` - If set, only one subscriber can consume from the Queue. Defaults to `false`.
   * `:passive` - If set, raises an error unless the queue already exists.  Defaults to `false`.
   * `:from` - A list of routing keys to bind the queue to.
@@ -95,11 +95,56 @@ defmodule MyApp.Broker do
 end
 ```
 
-## Publishing Messages
-TODO
+## Configuring a Subscriber
 
-## Special Headers
-TODO
+Inside an `incoming` block for a broker, you can define subscriptions to queues. Conduit will route messages on those
+queues to your subscribers.
+
+``` elixir
+defmodule MyApp.Broker do
+  incoming MyApp do
+    subscribe :my_subscriber, MySubscriber, from: "my.queue"
+    subscribe :my_other_subscriber, MyOtherSubscriber,
+      from: "my.other.queue",
+      prefetch_size: 20
+  end
+end
+```
+
+### Options
+
+* `:from` - Accepts a string or function that resolves to the queue to consume from. Defaults to the name of the route if not specified.
+* `:prefetch_size` - Size of prefetch buffer in octets. Defaults to `0`, which means no specific limit. This can also be configured globally.
+* `:prefetch_count` - Number of messages to prefetch. Defaults to `0`, which means no specific limit. This can also be configured globally.
+
+** Note: It's highly recommended to set `:prefetch_size` or `:prefetch_count` to a non-zero value to limit the memory consumed when a queue is backed up. **
+
+See [basic.qos](https://www.rabbitmq.com/amqp-0-9-1-reference.html#basic.qos) for more details on options.
+
+## Configuring a Publisher
+
+Inside an `outgoing` block for a broker, you can define publications to queues. Conduit will deliver messages using the
+options specified. You can override these options, by passing different options to your broker's `publish/3`.
+
+``` elixir
+defmodule MyApp.Broker do
+  outgoing do
+    publish :something,
+      to: "my.routing_key",
+      exchange: "amq.topic"
+    publish :something_else,
+      to: "my.other.routing_key",
+      exchange: "amq.topic"
+  end
+end
+```
+
+### Options
+
+* `:to` - The routing key for the message. If the message already has it's destination set, this option will be ignored.
+* `:exchange` - The exchange to publish to. This option is required.
+
+See [basic.publish](https://www.rabbitmq.com/amqp-0-9-1-reference.html#basic.publish) for more details.
 
 ## Architecture
 
