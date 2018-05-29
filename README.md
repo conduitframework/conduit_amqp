@@ -119,7 +119,7 @@ end
 * `:prefetch_size` - Size of prefetch buffer in octets. Defaults to `0`, which means no specific limit. This can also be configured globally.
 * `:prefetch_count` - Number of messages to prefetch. Defaults to `0`, which means no specific limit. This can also be configured globally.
 
-** Note: It's highly recommended to set `:prefetch_size` or `:prefetch_count` to a non-zero value to limit the memory consumed when a queue is backed up. **
+__Note: It's highly recommended to set `:prefetch_size` or `:prefetch_count` to a non-zero value to limit the memory consumed when a queue is backed up.__
 
 See [basic.qos](https://www.rabbitmq.com/amqp-0-9-1-reference.html#basic.qos) for more details on options.
 
