@@ -54,6 +54,7 @@ the name of the exchange and options for the exchange.
   * `:passive` - If set, returns an error if the Exchange does not already exist. Defaults to `false`.
   * `:internal` - If set, the exchange may not be used directly by publishers. Defaults to `false`.
 
+See [exchange.declare](https://www.rabbitmq.com/amqp-0-9-1-reference.html#exchange.declare) for more details.
 
 ### Example
 
@@ -82,6 +83,7 @@ the name of the queue and options for the exchange.
   * `:from` - A list of routing keys to bind the queue to.
   * `:exchange` - Name of the exchange used to bind the queue to the routing keys.
 
+See [queue.declare](https://www.rabbitmq.com/amqp-0-9-1-reference.html#queue.declare) for more details.
 
 ### Example
 
@@ -123,7 +125,7 @@ See [basic.qos](https://www.rabbitmq.com/amqp-0-9-1-reference.html#basic.qos) fo
 
 ## Configuring a Publisher
 
-Inside an `outgoing` block for a broker, you can define publications to queues. Conduit will deliver messages using the
+Inside an `outgoing` block for a broker, you can define publications to exchanges. Conduit will deliver messages using the
 options specified. You can override these options, by passing different options to your broker's `publish/3`.
 
 ``` elixir
