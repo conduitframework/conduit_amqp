@@ -63,7 +63,7 @@ defmodule MyApp.Broker do
   use Conduit.Broker, otp_app: :my_app
 
   configure do
-    exchange "my.topic", type: "topic", durable: true
+    exchange "my.topic", type: :topic, durable: true
   end
 end
 ```
