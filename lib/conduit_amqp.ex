@@ -1,11 +1,4 @@
 defmodule ConduitAMQP do
-  use Conduit.Adapter
-  use Supervisor
-  use AMQP
-  require Logger
-
-  @pool_size 5
-
   @moduledoc """
   AMQP adapter for Conduit.
 
@@ -22,6 +15,18 @@ defmodule ConduitAMQP do
     * `options` - Extra RabbitMQ options
 
   """
+  use Conduit.Adapter
+  use Supervisor
+  use AMQP
+  require Logger
+  alias ConduitAMQP.Meta
+  alias ConduitAMQP.Util
+
+  @type broker :: module
+  @type chan :: AMQP.Channel.t()
+  @type conn :: AMQP.Connection.t()
+
+  @pool_size 5
 
   def child_spec([broker, _, _, _] = args) do
     %{
@@ -32,6 +37,7 @@ defmodule ConduitAMQP do
   end
 
   def start_link(broker, topology, subscribers, opts) do
+    Meta.create(broker)
     Supervisor.start_link(__MODULE__, [broker, topology, subscribers, opts], name: name(broker))
   end
 
@@ -40,8 +46,10 @@ defmodule ConduitAMQP do
 
     children = [
       {ConduitAMQP.ConnPool, [broker, opts]},
-      {ConduitAMQP.PubSub, [broker, topology, subscribers, opts]},
-      {ConduitAMQP.Tasks, [broker]}
+      {ConduitAMQP.PubPool, [broker, opts]},
+      {ConduitAMQP.SubPool, [broker, subscribers, opts]},
+      {ConduitAMQP.Tasks, [broker]},
+      {ConduitAMQP.Setup, [broker, topology]}
     ]
 
     Supervisor.init(children, strategy: :one_for_one)
@@ -61,48 +69,40 @@ defmodule ConduitAMQP do
     exchange = Keyword.get(opts, :exchange)
     props = ConduitAMQP.Props.get(message)
 
-    case get_chan(broker, 0, @pool_size) do
-      {:ok, chan} ->
-        Basic.publish(chan, exchange, message.destination, message.body, props)
-
-      {:error, reason} ->
-        {:error, reason}
-    end
+    with_chan(broker, fn chan ->
+      Basic.publish(chan, exchange, message.destination, message.body, props)
+    end)
   end
 
+  @spec with_conn(broker, (conn -> term)) :: {:error, term} | {:ok, term} | term
   def with_conn(broker, fun) when is_function(fun, 1) do
-    with {:ok, conn} <- get_conn(broker, 0, @pool_size) do
+    with {:ok, conn} <- get_conn(broker, @pool_size) do
       fun.(conn)
     end
   end
 
-  defp get_conn(broker, retry_count, max_retry_count) do
-    conn_pool = ConduitAMQP.ConnPool.name(broker)
-
-    case :poolboy.transaction(conn_pool, &GenServer.call(&1, :conn)) do
-      {:ok, conn} ->
-        {:ok, conn}
-
-      {:error, _reason} when retry_count < max_retry_count ->
-        get_conn(broker, retry_count + 1, max_retry_count)
-
-      {:error, reason} ->
-        {:error, reason}
+  @spec with_chan(broker, (chan -> term)) :: {:error, term} | {:ok, term} | term
+  def with_chan(broker, fun) when is_function(fun, 1) do
+    with {:ok, chan} <- get_chan(broker, @pool_size) do
+      fun.(chan)
     end
   end
 
-  defp get_chan(broker, retry_count, max_retry_count) do
+  @doc false
+  defp get_conn(broker, retries) do
+    pool = ConduitAMQP.ConnPool.name(broker)
+
+    Util.retry([attempts: retries], fn ->
+      :poolboy.transaction(pool, &GenServer.call(&1, :conn))
+    end)
+  end
+
+  @doc false
+  defp get_chan(broker, retries) do
     pool = ConduitAMQP.PubPool.name(broker)
 
-    case :poolboy.transaction(pool, &GenServer.call(&1, :chan)) do
-      {:ok, chan} ->
-        {:ok, chan}
-
-      {:error, _reason} when retry_count < max_retry_count ->
-        get_chan(broker, retry_count + 1, max_retry_count)
-
-      {:error, reason} ->
-        {:error, reason}
-    end
+    Util.retry([attempts: retries], fn ->
+      :poolboy.transaction(pool, &GenServer.call(&1, :chan))
+    end)
   end
 end

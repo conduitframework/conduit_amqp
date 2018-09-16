@@ -61,12 +61,10 @@ defmodule ConduitAMQP.Props do
   end
 
   defp nilify_undefined(props) do
-    props
-    |> Enum.map(fn
+    Enum.into(props, %{}, fn
       {key, :undefined} -> {key, nil}
       {key, value} -> {key, value}
     end)
-    |> Enum.into(%{})
   end
 
   @passed_as_props [

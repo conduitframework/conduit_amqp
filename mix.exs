@@ -1,4 +1,4 @@
-defmodule ConduitAmqp.Mixfile do
+defmodule ConduitAMQP.Mixfile do
   use Mix.Project
 
   def project do
@@ -59,7 +59,6 @@ defmodule ConduitAmqp.Mixfile do
   end
 
   defp package do
-    # These are the default files included in the package
     [
       name: :conduit_amqp,
       files: ["lib", "mix.exs", "README*", "LICENSE*"],

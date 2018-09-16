@@ -5,6 +5,7 @@ defmodule ConduitAMQP.Sub do
   use GenServer
   use AMQP
   require Logger
+  alias ConduitAMQP.{Meta, Util}
 
   @reconnect_after_ms 5_000
 
@@ -22,7 +23,7 @@ defmodule ConduitAMQP.Sub do
 
   def init([broker, name, opts]) do
     Process.flag(:trap_exit, true)
-    send(self(), :connect)
+    send(self(), :poll_ready)
 
     {:ok,
      %{
@@ -44,6 +45,16 @@ defmodule ConduitAMQP.Sub do
 
   def handle_call(:chan, _from, %{status: :disconnected} = status) do
     {:reply, {:error, :disconnected}, status}
+  end
+
+  def handle_info(:poll_ready, %{broker: broker, name: name} = state) do
+    Util.wait_until(fn ->
+      Meta.get_queue_status(broker, name) == :complete
+    end)
+
+    send(self(), :connect)
+
+    {:noreply, state}
   end
 
   def handle_info(:connect, %{status: :disconnected, broker: broker, name: name, opts: opts} = state) do
