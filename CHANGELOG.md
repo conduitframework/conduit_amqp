@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.6.2 (2018-09-16)
+
 ### Changed
 
 - Make setup of exchanges/queues/bindings async, so that application doesn't crash if rabbit is unavailable
