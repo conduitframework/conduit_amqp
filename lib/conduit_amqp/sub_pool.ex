@@ -13,7 +13,7 @@ defmodule ConduitAMQP.SubPool do
   end
 
   def start_link(broker, subscribers, opts) do
-    Supervisor.start_link(__MODULE__, [broker, subscribers, opts], name: __MODULE__)
+    Supervisor.start_link(__MODULE__, [broker, subscribers, opts], name: name(broker))
   end
 
   def init([broker, subscribers, adapter_opts]) do
