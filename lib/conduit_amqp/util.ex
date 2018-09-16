@@ -1,4 +1,8 @@
 defmodule ConduitAMQP.Util do
+  @moduledoc """
+  Provides utilities to wait for something to happen
+  """
+
   @spec wait_until((() -> true | false)) :: :ok
   def wait_until(fun) when is_function(fun) do
     10
