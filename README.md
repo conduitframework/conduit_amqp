@@ -116,8 +116,8 @@ end
 ### Options
 
 * `:from` - Accepts a string or function that resolves to the queue to consume from. Defaults to the name of the route if not specified.
-* `:prefetch_size` - Size of prefetch buffer in octets. Defaults to `0`, which means no specific limit. This can also be configured globally.
-* `:prefetch_count` - Number of messages to prefetch. Defaults to `0`, which means no specific limit. This can also be configured globally.
+* `:prefetch_size` - Size of prefetch buffer in octets. Defaults to `0`, which means no specific limit. This can also be configured globally by passing this same option when configuring your Broker.
+* `:prefetch_count` - Number of messages to prefetch. Defaults to `0`, which means no specific limit. This can also be configured globally by passing this same option when configuring your Broker.
 
 __Note: It's highly recommended to set `:prefetch_size` or `:prefetch_count` to a non-zero value to limit the memory consumed when a queue is backed up.__
 
