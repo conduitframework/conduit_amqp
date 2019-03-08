@@ -61,8 +61,10 @@ defmodule ConduitAMQP.Sub do
     case ConduitAMQP.with_conn(broker, &Channel.open/1) do
       {:ok, chan} ->
         Process.monitor(chan.pid)
+
         Basic.qos(chan, opts)
-        Basic.consume(chan, opts[:from] || Atom.to_string(name))
+        Basic.consume(chan, opts[:from] || Atom.to_string(name), self(), opts)
+
         Logger.info("#{inspect(self())} Channel opened for subscription #{inspect(name)}")
 
         {:noreply, %{state | chan: chan, status: :connected}}

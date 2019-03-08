@@ -118,6 +118,12 @@ end
 * `:from` - Accepts a string or function that resolves to the queue to consume from. Defaults to the name of the route if not specified.
 * `:prefetch_size` - Size of prefetch buffer in octets. Defaults to `0`, which means no specific limit. This can also be configured globally by passing this same option when configuring your Broker.
 * `:prefetch_count` - Number of messages to prefetch. Defaults to `0`, which means no specific limit. This can also be configured globally by passing this same option when configuring your Broker.
+* `:consumer_tag` - Specifies the identifier for the consumer. The consumer tag is local to a channel, so two clients can use the same consumer tags. If this field is empty the server will generate a unique tag.
+* `:no_local` - If the no-local field is set the server will not send messages to the connection that published them. Defaults to `false`.
+* `:no_ack` - If this field is set the server does not expect acknowledgements for messages. That is, when a message is delivered to the client the server assumes the delivery will succeed and immediately dequeues it. Defaults to `false`.
+* `:exclusive` - Request exclusive consumer access, meaning only this consumer can access the queue. Defaults to `false`.
+* `:nowait` - If set, the server will not respond to the method. The client should not wait for a reply method. If the server could not complete the method it will raise a channel or connection exception. Defaults to `false`.
+* `:arguments` - A set of arguments for the consume. Defaults to `[]`.
 
 __Note: It's highly recommended to set `:prefetch_size` or `:prefetch_count` to a non-zero value to limit the memory consumed when a queue is backed up.__
 
