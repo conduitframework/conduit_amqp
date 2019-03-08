@@ -10,7 +10,7 @@ This package can be installed as:
 
     ```elixir
     def deps do
-      [{:conduit_amqp, "~> 0.6.1"}]
+      [{:conduit_amqp, "~> 0.6.3"}]
     end
     ```
 

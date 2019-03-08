@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.6.3 (2019-03-07)
+
+### Added
+
+- `subcribe` now supports options for queue consumption, which will allow RPC and a couple other use cases
+
 ## 0.6.2 (2018-09-16)
 
 ### Changed
