@@ -3,8 +3,8 @@ defmodule ConduitAMQP.Setup do
   Creates queues at startup and notifies pollers to start
   """
   use GenServer
-  alias ConduitAMQP.Util
   alias ConduitAMQP.Topology
+  alias ConduitAMQP.Util
 
   defmodule State do
     @moduledoc false

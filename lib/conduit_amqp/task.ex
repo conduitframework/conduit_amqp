@@ -2,9 +2,9 @@ defmodule ConduitAMQP.Task do
   @moduledoc """
   Runs the pipeline for a message.
   """
+  alias AMQP.Basic
   alias Conduit.Message
   alias ConduitAMQP.Props
-  alias AMQP.Basic
   import Conduit.Message
 
   def run(broker, chan, name, source, payload, props) do
