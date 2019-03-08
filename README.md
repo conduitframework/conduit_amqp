@@ -127,7 +127,7 @@ end
 
 __Note: It's highly recommended to set `:prefetch_size` or `:prefetch_count` to a non-zero value to limit the memory consumed when a queue is backed up.__
 
-See [basic.qos](https://www.rabbitmq.com/amqp-0-9-1-reference.html#basic.qos) for more details on options.
+See [basic.qos](https://www.rabbitmq.com/amqp-0-9-1-reference.html#basic.qos) and [basic.consume](https://www.rabbitmq.com/amqp-0-9-1-reference.html#basic.consume) for more details on options.
 
 ## Configuring a Publisher
 
