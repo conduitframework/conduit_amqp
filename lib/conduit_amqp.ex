@@ -70,7 +70,9 @@ defmodule ConduitAMQP do
     props = ConduitAMQP.Props.get(message)
 
     with_chan(broker, fn chan ->
-      Basic.publish(chan, exchange, message.destination, message.body, props)
+      with :ok <- Basic.publish(chan, exchange, message.destination, message.body, props) do
+        {:ok, message}
+      end
     end)
   end
 
