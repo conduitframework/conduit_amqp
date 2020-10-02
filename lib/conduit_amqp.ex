@@ -69,8 +69,42 @@ defmodule ConduitAMQP do
     exchange = Keyword.get(opts, :exchange)
     props = ConduitAMQP.Props.get(message)
 
+    {publisher_confirms, opts} =
+      Keyword.pop(
+        opts,
+        :publisher_confirms,
+        :no_confirmation
+      )
+
+    {publisher_confirms_timeout, opts} =
+      Keyword.pop(
+        opts,
+        :publisher_confirms_timeout,
+        :infinity
+      )
+
+    select = fn chan ->
+      if publisher_confirms in [:wait, :die] do
+        Confirm.select(chan)
+      else
+        :ok
+      end
+    end
+
+    wait_for_confirms = fn chan ->
+      case {publisher_confirms, publisher_confirms_timeout} do
+        {:no_confirmation, _} -> true
+        {:wait, :infinity} -> Confirm.wait_for_confirms(chan)
+        {:wait, timeout} -> Confirm.wait_for_confirms(chan, timeout)
+        {:die, :infinity} -> Confirm.wait_for_confirms_or_die(chan)
+        {:die, timeout} -> Confirm.wait_for_confirms_or_die(chan, timeout)
+      end
+    end
+
     with_chan(broker, fn chan ->
-      with :ok <- Basic.publish(chan, exchange, message.destination, message.body, props) do
+      with :ok <- select.(chan),
+           :ok <- Basic.publish(chan, exchange, message.destination, message.body, props),
+           true <- wait_for_confirms.(chan) do
         {:ok, message}
       end
     end)

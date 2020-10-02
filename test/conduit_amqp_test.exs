@@ -54,6 +54,71 @@ defmodule ConduitAMQPTest do
     end
   end
 
+  describe "publisher confirms" do
+    setup do
+      import Conduit.Message
+
+      message =
+        %Conduit.Message{}
+        |> put_destination("event.test")
+        |> put_body("test")
+
+      {:ok, %{message: message}}
+    end
+
+    test "wait for confirms, no timeout", %{message: message} do
+      ConduitAMQP.publish(
+        Broker,
+        message,
+        [],
+        exchange: "exchange.test",
+        publisher_confirms: :wait,
+        publisher_confirms_timeout: :infinity
+      )
+
+      assert_receive {:broker, _received_message}
+    end
+
+    test "wait for confirms, with timeout", %{message: message} do
+      ConduitAMQP.publish(
+        Broker,
+        message,
+        [],
+        exchange: "exchange.test",
+        publisher_confirms: :wait,
+        publisher_confirms_timeout: 5_000
+      )
+
+      assert_receive {:broker, _received_message}
+    end
+
+    test "wait for confirms or die, no timeout", %{message: message} do
+      ConduitAMQP.publish(
+        Broker,
+        message,
+        [],
+        exchange: "exchange.test",
+        publisher_confirms: :die,
+        publisher_confirms_timeout: :infinity
+      )
+
+      assert_receive {:broker, _received_message}
+    end
+
+    test "wait for confirms or die, with timeout", %{message: message} do
+      ConduitAMQP.publish(
+        Broker,
+        message,
+        [],
+        exchange: "exchange.test",
+        publisher_confirms: :die,
+        publisher_confirms_timeout: 5_000
+      )
+
+      assert_receive {:broker, _received_message}
+    end
+  end
+
   test "it configures the topology" do
     with_chan(Broker, fn chan ->
       assert :ok = Exchange.topic(chan, "exchange.test", passive: true)
