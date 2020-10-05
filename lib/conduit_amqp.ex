@@ -76,7 +76,7 @@ defmodule ConduitAMQP do
         :no_confirmation
       )
 
-    {publisher_confirms_timeout, opts} =
+    {publisher_confirms_timeout, _opts} =
       Keyword.pop(
         opts,
         :publisher_confirms_timeout,
