@@ -151,6 +151,8 @@ end
 
 * `:to` - The routing key for the message. If the message already has it's destination set, this option will be ignored.
 * `:exchange` - The exchange to publish to. This option is required.
+- `:publisher_confirms` - This configures [publisher confirms](https://www.rabbitmq.com/confirms.html#publisher-confirms). Should be one of `:no_confirmation` (the default), `:wait` (if it should just return an `:timeout` atom on failure) or `:die` (raises an exception on timeout).
+- `:publisher_confirms_timeout` - The timeout in milliseconds for the server acknowledgement. Should be `:infinity` for no timeout (the default) or an integer number of milliseconds.
 
 See [basic.publish](https://www.rabbitmq.com/amqp-0-9-1-reference.html#basic.publish) for more details.
 
