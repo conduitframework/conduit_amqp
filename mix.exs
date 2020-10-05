@@ -50,7 +50,7 @@ defmodule ConduitAMQP.Mixfile do
       {:connection, "~> 1.0"},
       {:poolboy, "~> 1.5"},
       {:conduit, "~> 0.11"},
-      {:ex_doc, "~> 0.19.0", only: :dev},
+      {:ex_doc, "~> 0.22.6", only: :dev},
       {:dialyxir, "~> 0.4", only: :dev},
       {:junit_formatter, "~> 3.0", only: :test},
       {:excoveralls, "~> 0.5", only: :test},
