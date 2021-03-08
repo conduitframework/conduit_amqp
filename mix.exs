@@ -46,7 +46,7 @@ defmodule ConduitAMQP.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
-      {:amqp, "~> 1.0 and >= 1.1.1"},
+      {:amqp, "~> 2.1"},
       {:connection, "~> 1.0"},
       {:poolboy, "~> 1.5"},
       {:conduit, "~> 0.11"},
