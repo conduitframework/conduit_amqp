@@ -137,10 +137,10 @@ options specified. You can override these options, by passing different options 
 ``` elixir
 defmodule MyApp.Broker do
   outgoing do
-    publish :something,
+    publish :destination_route,
       to: "my.routing_key",
       exchange: "amq.topic"
-    publish :something_else,
+    publish :other_destination_route,
       to: "my.other.routing_key",
       exchange: "amq.topic"
   end
@@ -149,12 +149,20 @@ end
 
 ### Options
 
-* `:to` - The routing key for the message. If the message already has it's destination set, this option will be ignored.
+* `:to` - The routing key for the message. If the message already has its destination set, this option will be ignored.
 * `:exchange` - The exchange to publish to. This option is required.
 - `:publisher_confirms` - This configures [publisher confirms](https://www.rabbitmq.com/confirms.html#publisher-confirms). Should be one of `:no_confirmation` (the default), `:wait` (if it should just return an `:timeout` atom on failure) or `:die` (raises an exception on timeout).
 - `:publisher_confirms_timeout` - The timeout in milliseconds for the server acknowledgement. Should be `:infinity` for no timeout (the default) or an integer number of milliseconds.
 
 See [basic.publish](https://www.rabbitmq.com/amqp-0-9-1-reference.html#basic.publish) for more details.
+
+### Example usage
+
+```elixir
+%Message{}
+|> put_body(%{"my" => "message"})
+|> Broker.publish(:destination_route)
+```
 
 ## Architecture
 
