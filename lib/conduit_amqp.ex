@@ -2,27 +2,22 @@ defmodule ConduitAMQP do
   @moduledoc """
   AMQP adapter for Conduit.
 
-    _Either_ a full `url` should be provided
-
     * `url` - Full connection url. Can be used instead of the individual
-    connection options (defaults to `amqp://guest:guest@localhost:5672/`);
+    connection options (defaults to `"amqp://guest:guest@localhost:5672/"`);
 
-    _or_ these options:
+    Individual connection options, which each can override its part
+    of the full `url`:
 
-    * `host` - Hostname of the broker (defaults to \"localhost\");
+    * `host` - Hostname of the broker (defaults to `"localhost"`);
     * `port` - Port the broker is listening on (defaults to `5672`);
-    * `username` - Username to connect to the broker as (defaults to \"guest\");
-    * `password` - Password to connect to the broker with (defaults to \"guest\");
-
-    In other words, setting `url` to, say, `amqp://localhost:5672` as well as
-    `username` and `password` will make the latter two options be ignored -
-    a default `username` and `password` will be used instead.
+    * `username` - Username to connect to the broker as (defaults to `"guest"`);
+    * `password` - Password to connect to the broker with (defaults to `"guest"`);
 
     Other options:
 
-    * `virtual_host` - Name of a virtual host in the broker (defaults to \"/\");
+    * `virtual_host` - Name of a virtual host in the broker (defaults to `"/"`);
     * `heartbeat` - Hearbeat interval in seconds (defaults to `0` - turned off);
-    * `connection_timeout` - Connection timeout in milliseconds (defaults to `infinity`);
+    * `connection_timeout` - Connection timeout in milliseconds (defaults to `:infinity`);
     * `conn_pool_size` - Number of active connections to the broker
     * `pub_pool_size` - Number of publisher channels
     * `options` - Extra RabbitMQ options
