@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/app
     docker:
-      - image: circleci/elixir:1.6.2
+      - image: circleci/elixir:1.12.3
         environment:
           - QUEUE_URL=amqp://localhost:5672
       - image: rabbitmq:3.7.3-management
